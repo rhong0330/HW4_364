@@ -72,7 +72,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(255), unique=True, index=True)
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
-    gifs = db.relationship('PersonalGifCollection',backref='User')
+    collections = db.relationship('PersonalGifCollection',backref='User')
     #TODO 364: In order to complete a relationship with a table that is detailed below (a one-to-many relationship for users and gif collections), you'll need to add a field to this User model. (Check out the TODOs for models below for more!)
     # Remember, the best way to do so is to add the field, save your code, and then create and run a migration!
 
@@ -353,9 +353,9 @@ def create_collection():
     gifs = Gif.query.all()
     choices = [(g.id, g.title) for g in gifs]
     form.gif_picks.choices = choices
-    if form.validate_on_submit():
-        gif_list = [get_gif_by_id(int(id)) for id in form.gif_picks.data]
-        get_or_create_collection(name = form.name.data, current_user = current_user, gif_list = gif_list)
+    if request.method == 'POST':
+        gifs = [get_gif_by_id(int(id)) for id in form.gif_picks.data]
+        get_or_create_collection(name=form.name.data, current_user=current_user, gif_list=gifs)
         return redirect(url_for('collections'))
     return render_template('create_collection.html',form=form)
     # DONE 364: If the form validates on submit, get the list of the gif ids that were selected from the form. Use the get_gif_by_id function to create a list of Gif objects.  Then, use the information available to you at this point in the function (e.g. the list of gif objects, the current_user) to invoke the get_or_create_collection function, and redirect to the page that shows a list of all your collections.
